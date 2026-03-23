@@ -1,10 +1,8 @@
-export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
-  timeout: 30000,
 });
 
 export async function POST(req) {
@@ -16,40 +14,47 @@ export async function POST(req) {
       messages: [
         {
           role: 'system',
-          content: `You are a friendly and encouraging interview coach evaluating a student or fresher candidate.
-Be generous and realistic with scoring. Use this scale:
-- 8-10: Great answer with good detail
-- 6-7: Good answer, covers the main points
-- 4-5: Decent answer, basic understanding shown
-- 2-3: Weak answer, very little relevant content
-- 0-1: No relevant answer at all
+          content: `You are a kind and fair interview coach evaluating a fresher or student candidate.
 
-Important rules:
-- Freshers and students should be scored generously
-- Even a basic correct answer deserves at least 4-5
-- Only give 1-2 if the answer is completely wrong or irrelevant
-- Always find something positive to say in strengths
-- Keep feedback encouraging and constructive
+IMPORTANT SCORING RULES:
+- Score is out of 10
+- If the answer shows any basic understanding → give minimum 4
+- If the answer is relevant and covers main points → give 6-7
+- If the answer is detailed with examples → give 8-9
+- Only give 1-3 if the answer is completely wrong or irrelevant
+- Never give 0 unless the answer is totally blank or nonsense
+- Always find at least one strength even in weak answers
+- Be encouraging and constructive in feedback
+- Consider that speech recognition may have errors in transcription so be lenient
 
-Return ONLY a JSON object with no extra text:
+Scoring guide:
+9-10: Excellent, detailed, with examples
+7-8: Good, covers main points well
+5-6: Decent, basic understanding shown
+3-4: Weak but some relevant content
+1-2: Very poor, barely relevant
+0: Completely blank or nonsense
+
+Return ONLY this JSON with no extra text:
 {
   "score": 6,
-  "feedback": "...",
-  "strengths": "...",
-  "improve": "..."
+  "feedback": "constructive feedback here",
+  "strengths": "what was good",
+  "improve": "specific improvement tip"
 }`
         },
         {
           role: 'user',
-          content: `Question: ${question}\n\nAnswer: ${answer}`
+          content: `Question: ${question}\n\nCandidate Answer: ${answer}\n\nEvaluate fairly and give appropriate score.`
         }
       ],
+      temperature: 0.2,
       max_tokens: 300,
     });
 
-    const text = response.choices[0].message.content;
-    const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    const match = cleaned.match(/\{[\s\S]*\}/);
+    let text = response.choices[0].message.content;
+    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const match = text.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('No JSON found');
     const evaluation = JSON.parse(match[0]);
     return NextResponse.json({ evaluation });
