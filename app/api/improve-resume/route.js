@@ -3,7 +3,6 @@ import Groq from 'groq-sdk';
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
-  timeout: 60000,
 });
 
 export async function POST(req) {
@@ -15,30 +14,18 @@ export async function POST(req) {
       messages: [
         {
           role: 'system',
-          content: `You are a helpful resume reviewer for students and freshers.
-Be encouraging and realistic. Use this rating scale:
-- 8-10: Excellent resume, very well structured
-- 6-7: Good resume with some improvements needed
-- 4-5: Average resume, needs work but has potential
-- 2-3: Weak resume, major improvements needed
-
-For a fresher with projects and skills listed, give at least 6-7.
-Always give 5 specific actionable suggestions.
-Return ONLY a JSON object with no extra text:
-{
-  "suggestions": ["suggestion 1","suggestion 2","suggestion 3","suggestion 4","suggestion 5"],
-  "improvedResume": "full improved resume text here",
-  "overallRating": 7,
-  "summary": "2 sentence encouraging summary"
-}`
+          content: `You are a resume reviewer for students. Be encouraging.
+Rate resume out of 10. For freshers with projects give at least 6-7.
+Return ONLY this JSON with no extra text:
+{"suggestions":["tip1","tip2","tip3","tip4","tip5"],"improvedResume":"improved resume text","overallRating":7,"summary":"one encouraging sentence"}`
         },
         {
           role: 'user',
-          content: 'Review this resume:\n\n' + resumeText.slice(0, 3000)
+          content: 'Review:\n\n' + resumeText.slice(0, 1000)
         }
       ],
       temperature: 0.3,
-      max_tokens: 1500,
+      max_tokens: 800,
     });
 
     let text = response.choices[0].message.content;
