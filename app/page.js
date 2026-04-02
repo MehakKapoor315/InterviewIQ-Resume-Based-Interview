@@ -437,29 +437,138 @@ export default function Home() {
   );
 
   // QUESTIONS PREVIEW STEP
-  if (step === 'questions') return (
-    <main style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <h2 style={{ marginBottom: '0.5rem' }}>📋 Your Interview Questions</h2>
-      <p style={{ color: '#666', marginBottom: '1.5rem' }}>Review your {questions.length} questions then start</p>
-      {questions.map((q) => (
-        <div key={q.id} style={{ marginBottom: '1rem', padding: '1.25rem', background: '#fff', borderRadius: '10px', border: '1px solid #e5e7eb' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span style={{ fontWeight: 'bold' }}>Q{q.id}.</span>
-            <span style={{ fontSize: '12px', padding: '2px 10px', borderRadius: '999px', color: 'white', background: typeColor[q.type] || '#6b7280' }}>
-              {q.type}
-            </span>
+  if (step === 'questions') {
+    const technicalCount = questions.filter(q => q.type === 'technical').length;
+    const behavioralCount = questions.filter(q => q.type === 'behavioral').length;
+    const projectCount = questions.filter(q => q.type === 'project').length;
+
+    return (
+      <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
+
+        {/* Navbar */}
+        <nav style={{
+          background: '#185FA5', padding: '14px 32px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        }}>
+          <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>
+            InterviewIQ
+          </span>
+          <span style={{
+            background: '#B5D4F4', color: '#0C447C',
+            fontSize: '11px', padding: '4px 12px',
+            borderRadius: '999px', fontWeight: '500'
+          }}>
+            AI Powered
+          </span>
+        </nav>
+
+        {/* Header */}
+        <div style={{
+          background: '#E6F1FB', padding: '28px 32px',
+          borderBottom: '1px solid #B5D4F4'
+        }}>
+          <h2 style={{ fontSize: '22px', fontWeight: '600', color: '#042C53', marginBottom: '6px' }}>
+            Your Interview Questions
+          </h2>
+          <p style={{ fontSize: '14px', color: '#185FA5' }}>
+            AI generated {questions.length} personalized questions based on your resume
+          </p>
+
+          {/* Stats */}
+          <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+            {[
+              { num: technicalCount, label: 'Technical' },
+              { num: behavioralCount, label: 'Behavioral' },
+              { num: projectCount, label: 'Project' },
+              { num: questions.length, label: 'Total' },
+            ].map((s, i) => (
+              <div key={i} style={{
+                background: '#fff', borderRadius: '8px',
+                padding: '10px 20px', border: '1px solid #B5D4F4',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '20px', fontWeight: '700', color: '#185FA5' }}>{s.num}</div>
+                <div style={{ fontSize: '11px', color: '#64748b' }}>{s.label}</div>
+              </div>
+            ))}
           </div>
-          <p style={{ margin: 0 }}>{q.question}</p>
         </div>
-      ))}
-      <button onClick={() => setStep('interview')} style={{
-        marginTop: '1rem', padding: '0.75rem 2rem', background: '#6366f1',
-        color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer'
-      }}>
-        🎥 Start Video Interview
-      </button>
-    </main>
-  );
+
+        {/* Questions list */}
+        <div style={{ padding: '24px 32px', background: '#fff', maxWidth: '900px', margin: '0 auto' }}>
+          {questions.map((q) => {
+            const badgeStyle = {
+              technical: { background: '#dbeafe', color: '#1d4ed8' },
+              behavioral: { background: '#ede9fe', color: '#6d28d9' },
+              project: { background: '#dcfce7', color: '#15803d' },
+            }[q.type] || { background: '#f1f5f9', color: '#475569' };
+
+            return (
+              <div key={q.id} style={{
+                background: '#f8fafc', borderRadius: '12px',
+                padding: '18px 20px', marginBottom: '12px',
+                border: '1px solid #e2e8f0',
+                display: 'flex', gap: '16px', alignItems: 'flex-start'
+              }}>
+                <div style={{
+                  width: '32px', height: '32px', background: '#185FA5',
+                  color: '#fff', borderRadius: '8px', fontSize: '13px',
+                  fontWeight: '600', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', flexShrink: 0
+                }}>
+                  {q.id}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '14px', color: '#1e293b', lineHeight: '1.6', marginBottom: '8px' }}>
+                    {q.question}
+                  </p>
+                  <span style={{
+                    display: 'inline-block', fontSize: '11px',
+                    padding: '3px 10px', borderRadius: '999px',
+                    fontWeight: '500', ...badgeStyle
+                  }}>
+                    {q.type}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer buttons */}
+        <div style={{
+          padding: '20px 32px', background: '#fff',
+          borderTop: '1px solid #e2e8f0',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          maxWidth: '900px', margin: '0 auto'
+        }}>
+          <button
+            onClick={() => setStep('upload')}
+            style={{
+              background: 'transparent', color: '#185FA5',
+              border: '1px solid #185FA5', padding: '12px 24px',
+              borderRadius: '8px', fontSize: '15px',
+              fontWeight: '500', cursor: 'pointer'
+            }}
+          >
+            ← Back
+          </button>
+          <button
+            onClick={() => setStep('interview')}
+            style={{
+              background: '#185FA5', color: '#fff',
+              border: 'none', padding: '12px 32px',
+              borderRadius: '8px', fontSize: '15px',
+              fontWeight: '500', cursor: 'pointer'
+            }}
+          >
+            Start Video Interview →
+          </button>
+        </div>
+
+      </main>
+    );
+  }
 
   // INTERVIEW STEP
   if (step === 'interview') return (
