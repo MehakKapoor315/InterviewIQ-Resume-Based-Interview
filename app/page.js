@@ -569,41 +569,87 @@ export default function Home() {
       </main>
     );
   }
-
-  // INTERVIEW STEP
+  
+  //INTERVIEW STEP
   if (step === 'interview') return (
-    <main style={{ padding: '2rem', maxWidth: '850px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
 
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h2 style={{ margin: 0 }}>🎥 Live Interview</h2>
-        <span style={{ color: '#666', fontSize: '14px' }}>
-          Question {currentQ + 1} of {questions.length}
+      {/* Navbar */}
+      <nav style={{
+        background: '#185FA5', padding: '14px 32px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+      }}>
+        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>
+          InterviewIQ
         </span>
-      </div>
+        <span style={{
+          background: '#B5D4F4', color: '#0C447C',
+          fontSize: '11px', padding: '4px 12px',
+          borderRadius: '999px', fontWeight: '500'
+        }}>
+          AI Powered
+        </span>
+      </nav>
 
       {/* Progress bar */}
-      <div style={{ height: '8px', background: '#e5e7eb', borderRadius: '4px', marginBottom: '1.5rem' }}>
+      <div style={{ height: '4px', background: '#B5D4F4' }}>
         <div style={{
           height: '100%',
           width: `${((currentQ + 1) / questions.length) * 100}%`,
-          background: '#6366f1', borderRadius: '4px', transition: 'width 0.4s'
+          background: '#185FA5', transition: 'width 0.4s'
         }} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      {/* Progress label */}
+      <div style={{
+        background: '#E6F1FB', padding: '10px 32px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: '1px solid #B5D4F4'
+      }}>
+        <span style={{ fontSize: '13px', color: '#185FA5', fontWeight: '500' }}>
+          Question {currentQ + 1} of {questions.length}
+        </span>
+        <span style={{ fontSize: '13px', color: '#185FA5' }}>
+          {Math.round(((currentQ + 1) / questions.length) * 100)}% complete
+        </span>
+      </div>
 
-        {/* Left — Camera */}
-        <div>
-          <Webcam
-            ref={webcamRef}
-            mirrored={true}
-            style={{ width: '100%', borderRadius: '12px', background: '#1f2937' }}
-          />
-          <p style={{ textAlign: 'center', fontSize: '12px', color: '#666', marginTop: '0.5rem' }}>
-            📹 You
-          </p>
+      {/* Main content */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: '1fr 1fr',
+        gap: '20px', padding: '24px 32px',
+        maxWidth: '1000px', margin: '0 auto'
+      }}>
 
+        {/* Left — Camera + Analysis */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+          {/* Camera */}
+          <div style={{ background: '#1e293b', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
+            <Webcam
+              ref={webcamRef}
+              mirrored={true}
+              style={{ width: '100%', display: 'block' }}
+            />
+            <div style={{
+              position: 'absolute', bottom: '10px', left: '10px',
+              background: 'rgba(0,0,0,0.5)', color: '#fff',
+              fontSize: '11px', padding: '4px 10px', borderRadius: '6px'
+            }}>
+              You
+            </div>
+            <div style={{
+              position: 'absolute', top: '10px', right: '10px',
+              background: '#dc2626', color: '#fff',
+              fontSize: '11px', padding: '4px 10px', borderRadius: '6px',
+              display: 'flex', alignItems: 'center', gap: '4px'
+            }}>
+              <div style={{ width: '6px', height: '6px', background: '#fff', borderRadius: '50%' }} />
+              LIVE
+            </div>
+          </div>
+
+          {/* Face analyzer */}
           <FaceAnalyzer
             webcamRef={webcamRef}
             isInterviewing={true}
@@ -612,87 +658,116 @@ export default function Home() {
 
           {/* Mic status */}
           <div style={{
-            marginTop: '0.75rem', padding: '0.75rem', borderRadius: '10px', textAlign: 'center',
-            background: isListening ? '#fef2f2' : '#f9fafb',
-            border: `1px solid ${isListening ? '#fca5a5' : '#e5e7eb'}`
+            padding: '12px 16px', borderRadius: '10px', textAlign: 'center',
+            background: isListening ? '#fef2f2' : '#f8fafc',
+            border: `1px solid ${isListening ? '#fca5a5' : '#e2e8f0'}`
           }}>
             {isListening ? (
-              <p style={{ margin: 0, color: '#ef4444', fontWeight: 'bold' }}>
-                🔴 Listening... speak your answer
+              <p style={{ margin: 0, color: '#dc2626', fontWeight: '600', fontSize: '13px' }}>
+                ● Recording... speak your answer
               </p>
             ) : (
-              <p style={{ margin: 0, color: '#6b7280' }}>
-                🎤 Mic is off
+              <p style={{ margin: 0, color: '#94a3b8', fontSize: '13px' }}>
+                Mic is off
               </p>
             )}
           </div>
 
-          {/* Transcript preview */}
+          {/* Transcript */}
           {(transcript || answer) && (
-            <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#f0f4ff', borderRadius: '8px', fontSize: '13px', color: '#374151' }}>
-              <strong>Your answer:</strong><br />
-              {transcript || answer}
-              {isListening && (
-                <span style={{ color: '#6366f1', marginLeft: '4px' }}>●</span>
-              )}
+            <div style={{
+              padding: '14px 16px', background: '#f8fafc',
+              borderRadius: '10px', border: '1px solid #e2e8f0'
+            }}>
+              <p style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '6px', fontWeight: '500' }}>
+                YOUR ANSWER
+              </p>
+              <p style={{ fontSize: '13px', color: '#334155', lineHeight: '1.6', margin: 0 }}>
+                {transcript || answer}
+                {isListening && <span style={{ color: '#185FA5', marginLeft: '4px' }}>●</span>}
+              </p>
             </div>
           )}
         </div>
 
         {/* Right — Question + Controls */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
           {/* Question card */}
-          <div style={{ padding: '1.25rem', background: '#f0f4ff', borderRadius: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-              <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#6366f1' }}>
-                QUESTION {currentQ + 1}
+          <div style={{
+            background: '#fff', borderRadius: '12px',
+            padding: '20px', border: '1px solid #e2e8f0', flex: 1
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '11px', fontWeight: '600', color: '#185FA5', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Question {currentQ + 1}
               </span>
               <span style={{
-                fontSize: '12px', padding: '2px 8px', borderRadius: '999px',
-                color: 'white', background: { technical: '#3b82f6', behavioral: '#8b5cf6', project: '#10b981' }[questions[currentQ].type] || '#6b7280'
+                fontSize: '11px', padding: '3px 10px', borderRadius: '999px', fontWeight: '500',
+                background: { technical: '#dbeafe', behavioral: '#ede9fe', project: '#dcfce7' }[questions[currentQ].type] || '#f1f5f9',
+                color: { technical: '#1d4ed8', behavioral: '#6d28d9', project: '#15803d' }[questions[currentQ].type] || '#475569'
               }}>
                 {questions[currentQ].type}
               </span>
             </div>
-            <p style={{ margin: 0, fontWeight: '500', fontSize: '15px', lineHeight: '1.5' }}>
+            <p style={{ fontSize: '16px', color: '#1e293b', lineHeight: '1.7', fontWeight: '500', margin: 0 }}>
               {questions[currentQ].question}
             </p>
-          </div>
 
-          {/* Speak question button */}
-          <button onClick={() => speakQuestion(questions[currentQ].question)} disabled={isSpeaking} style={{
-            padding: '0.75rem', borderRadius: '8px', border: 'none',
-            cursor: isSpeaking ? 'not-allowed' : 'pointer',
-            background: isSpeaking ? '#fbbf24' : '#6366f1',
-            color: 'white', fontWeight: 'bold', fontSize: '14px'
-          }}>
-            {isSpeaking ? '🔊 AI is speaking...' : '🔊 Hear Question'}
-          </button>
+            {/* Hear question button */}
+            <button
+              onClick={() => speakQuestion(questions[currentQ].question)}
+              disabled={isSpeaking}
+              style={{
+                width: '100%', marginTop: '16px',
+                background: isSpeaking ? '#fbbf24' : '#E6F1FB',
+                color: isSpeaking ? '#fff' : '#185FA5',
+                border: '1px solid #B5D4F4',
+                padding: '10px', borderRadius: '8px',
+                fontSize: '13px', fontWeight: '500', cursor: 'pointer'
+              }}
+            >
+              {isSpeaking ? '🔊 AI is speaking...' : '🔊 Hear Question'}
+            </button>
+          </div>
 
           {/* Mic button */}
           <button
             onClick={isListening ? stopListening : startListening}
             disabled={isSpeaking}
             style={{
-              padding: '0.75rem', borderRadius: '8px', border: 'none',
+              padding: '14px', borderRadius: '10px', border: 'none',
               cursor: isSpeaking ? 'not-allowed' : 'pointer',
-              background: isListening ? '#ef4444' : '#10b981',
-              color: 'white', fontWeight: 'bold', fontSize: '14px'
+              background: isListening ? '#dc2626' : '#16a34a',
+              color: '#fff', fontWeight: '600', fontSize: '15px'
             }}
           >
             {isListening ? '⏹ Stop Recording' : '🎤 Start Recording Answer'}
           </button>
 
           {/* Submit button */}
-          <button onClick={submitAnswer} disabled={loading || !answer.trim()} style={{
-            padding: '0.75rem', borderRadius: '8px', border: 'none',
-            cursor: loading || !answer.trim() ? 'not-allowed' : 'pointer',
-            background: loading || !answer.trim() ? '#ccc' : '#1f2937',
-            color: 'white', fontWeight: 'bold', fontSize: '14px'
-          }}>
+          <button
+            onClick={submitAnswer}
+            disabled={loading || !answer.trim()}
+            style={{
+              padding: '14px', borderRadius: '10px', border: 'none',
+              cursor: loading || !answer.trim() ? 'not-allowed' : 'pointer',
+              background: loading || !answer.trim() ? '#cbd5e1' : '#185FA5',
+              color: '#fff', fontWeight: '600', fontSize: '15px'
+            }}
+          >
             {loading ? '⏳ Evaluating answer...' : currentQ + 1 === questions.length ? '✅ Finish Interview' : '➡️ Submit & Next Question'}
           </button>
+
+          {/* Tips */}
+          <div style={{
+            padding: '14px 16px', background: '#fffbeb',
+            borderRadius: '10px', border: '1px solid #fcd34d'
+          }}>
+            <p style={{ fontSize: '12px', color: '#92400e', margin: 0, lineHeight: '1.6' }}>
+              💡 <strong>Tips:</strong> Speak clearly, maintain eye contact with camera, avoid filler words like "uh" and "umm"
+            </p>
+          </div>
 
         </div>
       </div>
