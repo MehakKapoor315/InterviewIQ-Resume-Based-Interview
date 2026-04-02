@@ -34,7 +34,13 @@ export async function POST(req) {
       messages: [
         {
           role: 'system',
-          content: 'You are a technical interviewer. Generate exactly 8 interview questions. Return ONLY a JSON array, no markdown, no extra text: [{"id":1,"question":"...","type":"technical"}] Types: technical, behavioral, project'
+          content: `You are a technical interviewer. Generate exactly 8 interview questions with this exact distribution:
+- 3 technical questions (about skills, concepts, programming)
+- 3 project questions (about specific projects mentioned in profile)
+- 2 behavioral questions (about teamwork, challenges, leadership)
+Return ONLY a JSON array, no markdown, no extra text:
+[{"id":1,"question":"...","type":"technical"}]
+Types must be exactly: technical, behavioral, or project`
         },
         {
           role: 'user',
