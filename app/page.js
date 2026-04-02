@@ -23,6 +23,7 @@ export default function Home() {
   const [micError, setMicError] = useState('');
   const webcamRef = useRef(null);
   const recognitionRef = useRef(null);
+  const isListeningRef = useRef(false);
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
