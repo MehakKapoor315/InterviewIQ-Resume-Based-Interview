@@ -247,28 +247,192 @@ export default function Home() {
 
   // UPLOAD STEP
   if (step === 'upload') return (
-    <main style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <h1 style={{ marginBottom: '0.5rem' }}>🎯 AI Interview Assistant</h1>
-      <p style={{ color: '#666', marginBottom: '1.5rem' }}>Upload your resume to get started</p>
-      <div style={{ border: '2px dashed #ccc', borderRadius: '12px', padding: '2rem', textAlign: 'center' }}>
-        <p style={{ marginBottom: '1rem' }}>📄 Select your resume (PDF only)</p>
-        <input type="file" accept=".pdf" onChange={handleUpload} />
+    <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
+
+      {/* Navbar */}
+      <nav style={{
+        background: '#185FA5', padding: '14px 32px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+      }}>
+        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600', letterSpacing: '-0.3px' }}>
+          InterviewIQ
+        </span>
+        <span style={{
+          background: '#B5D4F4', color: '#0C447C',
+          fontSize: '11px', padding: '4px 12px',
+          borderRadius: '999px', fontWeight: '500'
+        }}>
+          AI Powered
+        </span>
+      </nav>
+
+      {/* Hero */}
+      <div style={{
+        background: '#E6F1FB', padding: '52px 32px 44px',
+        textAlign: 'center', borderBottom: '1px solid #B5D4F4'
+      }}>
+        <h1 style={{
+          fontSize: '32px', fontWeight: '700',
+          color: '#042C53', marginBottom: '12px', lineHeight: '1.2'
+        }}>
+          Prepare smarter.<br />Interview with confidence.
+        </h1>
+        <p style={{
+          fontSize: '16px', color: '#185FA5',
+          maxWidth: '500px', margin: '0 auto', lineHeight: '1.7'
+        }}>
+          Upload your resume and let AI generate personalized interview questions,
+          analyze your responses, and help you land your dream job.
+        </p>
       </div>
-      {loading && <p style={{ marginTop: '1rem', color: '#888' }}>⏳ Parsing resume...</p>}
-      {error && <p style={{ color: 'red', marginTop: '1rem' }}>❌ {error}</p>}
-      {resumeText && (
-        <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f0fff4', borderRadius: '12px', border: '1px solid #86efac' }}>
-          <h3 style={{ color: '#16a34a' }}>✅ Resume Parsed — {fileName}</h3>
-          <button onClick={generateQuestions} disabled={loading} style={{
-            marginTop: '1rem', padding: '0.75rem 2rem',
-            background: loading ? '#ccc' : '#6366f1',
-            color: 'white', border: 'none', borderRadius: '8px',
-            fontSize: '16px', cursor: 'pointer'
+
+      {/* Feature cards */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '16px', padding: '32px', background: '#fff',
+        maxWidth: '900px', margin: '0 auto'
+      }}>
+        {[
+          { icon: '📄', title: 'Resume-based questions', desc: 'AI reads your resume and generates personalized interview questions based on your skills and experience' },
+          { icon: '🎥', title: 'Live video interview', desc: 'Real-time camera interview with eye contact tracking, posture analysis and voice recognition' },
+          { icon: '📊', title: 'Detailed PDF report', desc: 'Download complete performance report with scores, feedback and resume improvement suggestions' },
+        ].map((f, i) => (
+          <div key={i} style={{
+            background: '#f8fafc', borderRadius: '12px',
+            padding: '20px', border: '1px solid #e2e8f0'
           }}>
-            {loading ? '⏳ Generating...' : '🤖 Generate Interview Questions'}
-          </button>
+            <div style={{
+              width: '40px', height: '40px', background: '#E6F1FB',
+              borderRadius: '10px', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', fontSize: '18px', marginBottom: '12px'
+            }}>
+              {f.icon}
+            </div>
+            <p style={{ fontSize: '14px', fontWeight: '600', color: '#042C53', marginBottom: '6px' }}>
+              {f.title}
+            </p>
+            <p style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.6' }}>
+              {f.desc}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Upload box */}
+      <div style={{ padding: '0 32px 32px', background: '#fff', maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{
+          border: '2px dashed #85B7EB', borderRadius: '16px',
+          padding: '48px 24px', textAlign: 'center', background: '#E6F1FB'
+        }}>
+          <div style={{
+            width: '56px', height: '56px', background: '#fff',
+            borderRadius: '14px', border: '1px solid #B5D4F4',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 16px', fontSize: '24px'
+          }}>
+            📤
+          </div>
+          <p style={{ fontSize: '17px', fontWeight: '600', color: '#042C53', marginBottom: '8px' }}>
+            Upload your resume to get started
+          </p>
+          <p style={{ fontSize: '14px', color: '#185FA5', marginBottom: '24px' }}>
+            PDF format only — your resume will be analyzed by AI
+          </p>
+
+          <label style={{
+            display: 'inline-block', background: '#185FA5', color: '#fff',
+            padding: '12px 32px', borderRadius: '8px', fontSize: '15px',
+            fontWeight: '500', cursor: 'pointer'
+          }}>
+            Choose PDF file
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleUpload}
+              style={{ display: 'none' }}
+            />
+          </label>
+
+          {loading && (
+            <p style={{ marginTop: '16px', color: '#185FA5', fontSize: '14px' }}>
+              ⏳ Parsing your resume...
+            </p>
+          )}
+          {error && (
+            <p style={{ marginTop: '16px', color: '#dc2626', fontSize: '14px' }}>
+              {error}
+            </p>
+          )}
         </div>
-      )}
+
+        {/* Success state */}
+        {resumeText && !loading && (
+          <div style={{
+            marginTop: '20px', padding: '20px 24px',
+            background: '#f0fdf4', borderRadius: '12px',
+            border: '1px solid #86efac',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '40px', height: '40px', background: '#dcfce7',
+                borderRadius: '10px', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', fontSize: '18px'
+              }}>
+                ✅
+              </div>
+              <div>
+                <p style={{ fontSize: '14px', fontWeight: '600', color: '#166534', margin: 0 }}>
+                  Resume parsed successfully
+                </p>
+                <p style={{ fontSize: '13px', color: '#16a34a', margin: 0 }}>
+                  {fileName}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={generateQuestions}
+              disabled={loading}
+              style={{
+                background: loading ? '#ccc' : '#185FA5',
+                color: '#fff', border: 'none',
+                padding: '12px 28px', borderRadius: '8px',
+                fontSize: '15px', fontWeight: '500',
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {loading ? 'Generating...' : 'Generate Questions →'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Steps */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        gap: '0', padding: '24px 32px', background: '#fff',
+        borderTop: '1px solid #e2e8f0', maxWidth: '900px', margin: '0 auto'
+      }}>
+        {['Upload resume', 'Generate questions', 'Start interview', 'Get report'].map((s, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '26px', height: '26px', background: '#185FA5',
+                color: '#fff', borderRadius: '50%', fontSize: '12px',
+                fontWeight: '600', display: 'flex',
+                alignItems: 'center', justifyContent: 'center'
+              }}>
+                {i + 1}
+              </div>
+              <span style={{ fontSize: '13px', color: '#475569' }}>{s}</span>
+            </div>
+            {i < 3 && (
+              <div style={{ width: '32px', height: '1px', background: '#B5D4F4', margin: '0 12px' }} />
+            )}
+          </div>
+        ))}
+      </div>
+
     </main>
   );
 
