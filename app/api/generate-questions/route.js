@@ -3,39 +3,38 @@ import Groq from 'groq-sdk';
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
-  timeout: 60000,
 });
 
 export async function POST(req) {
   try {
     const { resumeText } = await req.json();
 
-    // Step 1 — Extract key info from resume first (fast)
+    // Step 1 — Extract key info
     const extractResponse = await groq.chat.completions.create({
       model: 'llama-3.1-8b-instant',
       messages: [
         {
           role: 'system',
-          content: 'Extract key information from this resume in 200 words max. Include: name, skills, projects, experience, education. Be concise.'
+          content: 'Extract key information from this resume in 150 words max. Include name, skills, projects, education. Be concise.'
         },
         {
           role: 'user',
-          content: resumeText.slice(0, 4000)
+          content: resumeText.slice(0, 2000)
         }
       ],
       temperature: 0.1,
-      max_tokens: 300,
+      max_tokens: 200,
     });
 
     const resumeSummary = extractResponse.choices[0].message.content;
 
-    // Step 2 — Generate questions from summary (fast + accurate)
+    // Step 2 — Generate questions
     const response = await groq.chat.completions.create({
       model: 'llama-3.1-8b-instant',
       messages: [
         {
           role: 'system',
-          content: 'You are an expert technical interviewer. Generate exactly 8 interview questions based on the candidate profile. Ask specific questions about their actual projects, skills and experience mentioned. Return ONLY a valid JSON array: [{"id":1,"question":"...","type":"technical"}] Types: technical, behavioral, project. No extra text.'
+          content: 'You are a technical interviewer. Generate exactly 8 interview questions. Return ONLY a JSON array, no markdown, no extra text: [{"id":1,"question":"...","type":"technical"}] Types: technical, behavioral, project'
         },
         {
           role: 'user',
@@ -54,7 +53,7 @@ export async function POST(req) {
     return NextResponse.json({ questions });
 
   } catch (error) {
-    console.error('Question generation error:', error);
-    return NextResponse.json({ error: 'Failed to generate questions' }, { status: 500 });
+    console.error('Question generation error:', error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
