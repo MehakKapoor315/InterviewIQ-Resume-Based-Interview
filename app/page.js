@@ -92,14 +92,13 @@ export default function Home() {
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'en-IN';
-      recognition.maxAlternatives = 3; // ← ADD THIS
+      recognition.maxAlternatives = 3;
 
       recognition.onresult = (e) => {
         let final = '';
         let interim = '';
         for (let i = 0; i < e.results.length; i++) {
           if (e.results[i].isFinal) {
-            // Pick the most confident alternative
             let bestTranscript = '';
             let bestConfidence = 0;
             for (let j = 0; j < e.results[i].length; j++) {
@@ -113,9 +112,9 @@ export default function Home() {
             interim += e.results[i][0].transcript;
           }
         }
-        if (final) {
-          setTranscript(final);
-          setAnswer(final);
+        if (final.trim()) {
+          setTranscript(prev => prev + final);
+          setAnswer(prev => prev + final);
         } else if (interim) {
           setTranscript(interim);
         }
@@ -123,40 +122,37 @@ export default function Home() {
 
       recognition.onerror = (e) => {
         if (e.error === 'aborted') {
-          // Silently restart on abort — this is normal
           setTimeout(() => {
-            try {
-              recognition.start();
-            } catch (err) {
-              // ignore
+            if (isListeningRef.current) {
+              try { recognition.start(); } catch (err) { }
             }
           }, 300);
-          return; // Don't show any error
+          return;
         } else if (e.error === 'network') {
           alert('Speech recognition needs internet connection.');
           setIsListening(false);
+          isListeningRef.current = false;
         } else if (e.error === 'not-allowed') {
           alert('Microphone blocked. Please allow mic in Chrome settings.');
           setIsListening(false);
+          isListeningRef.current = false;
         } else {
           console.log('Mic error:', e.error);
-          setIsListening(false);
         }
       };
 
       recognition.onend = () => {
-        // Auto restart if still supposed to be listening
-        if (recognitionRef.current && isListening) {
-          try {
-            recognition.start();
-          } catch (e) {
-            console.log('Restart failed:', e);
-          }
+        // Auto restart only if still listening
+        if (isListeningRef.current) {
+          try { recognition.start(); } catch (e) { }
+        } else {
+          setIsListening(false);
         }
       };
 
       recognition.start();
       recognitionRef.current = recognition;
+      isListeningRef.current = true;
       setIsListening(true);
 
     } catch (err) {
@@ -166,6 +162,7 @@ export default function Home() {
   };
 
   const stopListening = () => {
+    isListeningRef.current = false;
     if (recognitionRef.current) recognitionRef.current.stop();
     setIsListening(false);
   };
@@ -570,7 +567,7 @@ export default function Home() {
       </main>
     );
   }
-  
+
   //INTERVIEW STEP
   if (step === 'interview') return (
     <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
@@ -748,7 +745,11 @@ export default function Home() {
 
           {/* Submit button */}
           <button
-            onClick={submitAnswer}
+            onClick={() => {
+              console.log('Answer at submit:', answer);
+              console.log('Answer length:', answer.length);
+              submitAnswer();
+            }}
             disabled={loading || !answer.trim()}
             style={{
               padding: '14px', borderRadius: '10px', border: 'none',
@@ -790,130 +791,168 @@ export default function Home() {
       evaluations.reduce((sum, e) => sum + e.evaluation.score, 0) / evaluations.length
     );
 
+    const totalFillers = fillerStats.reduce((sum, f) => sum + f.totalFillers, 0);
+    const allFillers = {};
+    fillerStats.forEach(f => {
+      Object.entries(f.found || {}).forEach(([word, count]) => {
+        allFillers[word] = (allFillers[word] || 0) + count;
+      });
+    });
+
     return (
-      <main style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-        <h2 style={{ marginBottom: '0.5rem' }}>🎉 Interview Complete!</h2>
+      <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
 
-        {/* Overall score */}
-        <div style={{
-          padding: '1.5rem', borderRadius: '12px', textAlign: 'center', marginBottom: '2rem',
-          background: avgScore >= 7 ? '#f0fff4' : avgScore >= 5 ? '#fffbeb' : '#f0f4ff',
-          border: `1px solid ${avgScore >= 7 ? '#86efac' : avgScore >= 5 ? '#fcd34d' : '#c7d2fe'}`
+        {/* Navbar */}
+        <nav style={{
+          background: '#185FA5', padding: '14px 32px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between'
         }}>
-          <p style={{ fontSize: '48px', fontWeight: 'bold', margin: 0, color: avgScore >= 7 ? '#16a34a' : avgScore >= 5 ? '#d97706' : '#6366f1' }}>
+          <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
+          <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>
+            AI Powered
+          </span>
+        </nav>
+
+        {/* Hero - Overall Score */}
+        <div style={{
+          background: '#E6F1FB', padding: '32px',
+          borderBottom: '1px solid #B5D4F4', textAlign: 'center'
+        }}>
+          <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#042C53', marginBottom: '6px' }}>
+            Interview Complete!
+          </h2>
+          <p style={{ fontSize: '14px', color: '#185FA5' }}>Here is your complete performance report</p>
+          <div style={{
+            fontSize: '56px', fontWeight: '700', margin: '12px 0 4px',
+            color: avgScore >= 7 ? '#16a34a' : avgScore >= 5 ? '#185FA5' : '#dc2626'
+          }}>
             {avgScore}/10
-          </p>
-          <p style={{ color: '#666', marginTop: '0.5rem' }}>Overall Score</p>
-          <p style={{ color: '#374151', fontWeight: 'bold', marginTop: '0.25rem' }}>
-            {avgScore >= 7 ? '🌟 Excellent!' : avgScore >= 5 ? '👍 Good!' : '💪 Keep Practicing!'}
-          </p>
-        </div>
-
-        {/* Per question results */}
-        {/* Analysis Summary */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-
-          <div style={{ padding: '1rem', background: '#fff', borderRadius: '10px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
-            <p style={{ fontSize: '24px', margin: 0 }}>👁️</p>
-            <p style={{ fontSize: '20px', fontWeight: 'bold', margin: '0.25rem 0', color: faceStats.eyeContact >= 70 ? '#10b981' : faceStats.eyeContact >= 50 ? '#f59e0b' : '#ef4444' }}>
-              {faceStats.eyeContact}%
-            </p>
-            <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Eye Contact</p>
           </div>
-
-          <div style={{ padding: '1rem', background: '#fff', borderRadius: '10px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
-            <p style={{ fontSize: '24px', margin: 0 }}>🧍</p>
-            <p style={{ fontSize: '20px', fontWeight: 'bold', margin: '0.25rem 0', color: faceStats.posture >= 70 ? '#10b981' : faceStats.posture >= 50 ? '#f59e0b' : '#ef4444' }}>
-              {faceStats.posture}%
-            </p>
-            <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Posture</p>
-          </div>
-
-          <div style={{ padding: '1rem', background: '#fff', borderRadius: '10px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
-            <p style={{ fontSize: '24px', margin: 0 }}>🗣️</p>
-            <p style={{ fontSize: '20px', fontWeight: 'bold', margin: '0.25rem 0', color: fillerStats.reduce((sum, f) => sum + f.totalFillers, 0) <= 5 ? '#10b981' : fillerStats.reduce((sum, f) => sum + f.totalFillers, 0) <= 15 ? '#f59e0b' : '#ef4444' }}>
-              {fillerStats.reduce((sum, f) => sum + f.totalFillers, 0)}
-            </p>
-            <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Filler Words</p>
+          <div style={{ fontSize: '13px', color: '#64748b' }}>Overall Score</div>
+          <div style={{
+            display: 'inline-block', marginTop: '8px',
+            background: avgScore >= 7 ? '#dcfce7' : avgScore >= 5 ? '#dbeafe' : '#fee2e2',
+            color: avgScore >= 7 ? '#15803d' : avgScore >= 5 ? '#1d4ed8' : '#dc2626',
+            fontSize: '13px', padding: '6px 20px', borderRadius: '999px', fontWeight: '500'
+          }}>
+            {avgScore >= 7 ? '🌟 Excellent Performance!' : avgScore >= 5 ? '👍 Good Performance!' : '💪 Keep Practicing!'}
           </div>
         </div>
 
-        {/* Filler word details */}
-        {fillerStats.length > 0 && (() => {
-          const allFillers = {};
-          fillerStats.forEach(f => {
-            Object.entries(f.found).forEach(([word, count]) => {
-              allFillers[word] = (allFillers[word] || 0) + count;
-            });
-          });
-          const totalFillers = Object.values(allFillers).reduce((a, b) => a + b, 0);
+        {/* Metrics */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '12px', padding: '24px 32px', background: '#fff',
+          maxWidth: '900px', margin: '0 auto'
+        }}>
+          {[
+            { icon: '👁️', val: `${faceStats.eyeContact}%`, label: 'Eye Contact', color: faceStats.eyeContact >= 70 ? '#16a34a' : faceStats.eyeContact >= 50 ? '#d97706' : '#dc2626' },
+            { icon: '🧍', val: `${faceStats.posture}%`, label: 'Posture', color: faceStats.posture >= 70 ? '#16a34a' : faceStats.posture >= 50 ? '#d97706' : '#dc2626' },
+            { icon: '🗣️', val: totalFillers, label: 'Filler Words', color: totalFillers <= 5 ? '#16a34a' : totalFillers <= 15 ? '#d97706' : '#dc2626' },
+          ].map((m, i) => (
+            <div key={i} style={{
+              background: '#f8fafc', borderRadius: '12px',
+              padding: '16px', border: '1px solid #e2e8f0', textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '20px', marginBottom: '6px' }}>{m.icon}</div>
+              <div style={{ fontSize: '22px', fontWeight: '700', color: m.color, marginBottom: '2px' }}>{m.val}</div>
+              <div style={{ fontSize: '12px', color: '#64748b' }}>{m.label}</div>
+            </div>
+          ))}
+        </div>
 
-          return totalFillers > 0 ? (
-            <div style={{ padding: '1.25rem', background: '#fffbeb', borderRadius: '10px', border: '1px solid #fcd34d', marginBottom: '2rem' }}>
-              <h3 style={{ margin: '0 0 0.75rem', color: '#92400e' }}>🗣️ Filler Words Detected</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+        {/* Filler words */}
+        {totalFillers > 0 && (
+          <div style={{ padding: '0 32px 20px', background: '#fff', maxWidth: '900px', margin: '0 auto' }}>
+            <div style={{
+              background: '#fffbeb', borderRadius: '10px',
+              padding: '16px', border: '1px solid #fcd34d'
+            }}>
+              <p style={{ fontSize: '13px', fontWeight: '600', color: '#92400e', marginBottom: '10px' }}>
+                Filler Words Detected
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
                 {Object.entries(allFillers).map(([word, count]) => (
-                  <span key={word} style={{ padding: '4px 10px', background: '#fef3c7', borderRadius: '999px', fontSize: '13px', color: '#92400e' }}>
-                    "{word}" × {count}
+                  <span key={word} style={{
+                    background: '#fef3c7', color: '#92400e',
+                    fontSize: '12px', padding: '4px 12px', borderRadius: '999px'
+                  }}>
+                    "{word}" x{count}
                   </span>
                 ))}
               </div>
-              <p style={{ margin: 0, fontSize: '13px', color: '#78350f' }}>
-                💡 <strong>Tip:</strong> Instead of saying filler words, take a short pause. It sounds more confident and professional.
+              <p style={{ fontSize: '12px', color: '#78350f', margin: 0 }}>
+                💡 Tip: Take a short pause instead of using filler words. It sounds more confident and professional.
               </p>
             </div>
-          ) : null;
-        })()}
-        {evaluations.map((e, i) => (
-          <div key={i} style={{
-            marginBottom: '1.5rem', padding: '1.5rem',
-            background: '#fff', borderRadius: '12px', border: '1px solid #e5e7eb'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-              <strong style={{ fontSize: '14px', flex: 1, marginRight: '1rem' }}>Q{i + 1}. {e.question}</strong>
-              <span style={{
-                fontSize: '18px', fontWeight: 'bold', minWidth: '50px', textAlign: 'right',
-                color: e.evaluation.score >= 7 ? '#10b981' : e.evaluation.score >= 5 ? '#f59e0b' : '#ef4444'
-              }}>
-                {e.evaluation.score}/10
-              </span>
-            </div>
-            <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '0.5rem' }}>
-              🗣 <em>{e.answer}</em>
-            </p>
-            <p style={{ fontSize: '13px', color: '#374151', marginBottom: '0.4rem' }}>💬 {e.evaluation.feedback}</p>
-            <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '0.4rem' }}>✅ {e.evaluation.strengths}</p>
-            <p style={{ fontSize: '13px', color: '#f59e0b' }}>💡 {e.evaluation.improve}</p>
           </div>
-        ))}
+        )}
+
+        {/* Question breakdown */}
+        <div style={{ padding: '0 32px 24px', background: '#fff', maxWidth: '900px', margin: '0 auto' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#042C53', marginBottom: '12px' }}>
+            Question by Question Breakdown
+          </h3>
+          {evaluations.map((e, i) => (
+            <div key={i} style={{
+              background: '#f8fafc', borderRadius: '12px',
+              padding: '16px 18px', marginBottom: '10px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                <strong style={{ fontSize: '13px', color: '#1e293b', flex: 1, marginRight: '12px' }}>
+                  Q{i + 1}. {e.question}
+                </strong>
+                <span style={{
+                  fontSize: '16px', fontWeight: '700', flexShrink: 0,
+                  color: e.evaluation.score >= 7 ? '#16a34a' : e.evaluation.score >= 5 ? '#d97706' : '#dc2626'
+                }}>
+                  {e.evaluation.score}/10
+                </span>
+              </div>
+              <p style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic', marginBottom: '6px' }}>
+                "{e.answer}"
+              </p>
+              <p style={{ fontSize: '12px', color: '#374151', marginBottom: '4px' }}>💬 {e.evaluation.feedback}</p>
+              <p style={{ fontSize: '12px', color: '#16a34a', marginBottom: '4px' }}>✅ {e.evaluation.strengths}</p>
+              <p style={{ fontSize: '12px', color: '#d97706', margin: 0 }}>💡 {e.evaluation.improve}</p>
+            </div>
+          ))}
+        </div>
 
         {/* Buttons */}
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
+          gap: '12px', padding: '0 32px 32px',
+          background: '#fff', maxWidth: '900px', margin: '0 auto'
+        }}>
           <button onClick={() => setStep('resume-suggestions')} style={{
-            flex: 1, padding: '0.85rem', background: '#10b981',
-            color: 'white', border: 'none', borderRadius: '8px',
-            fontSize: '15px', cursor: 'pointer', fontWeight: 'bold'
+            background: '#16a34a', color: '#fff', border: 'none',
+            padding: '12px', borderRadius: '8px',
+            fontSize: '13px', fontWeight: '500', cursor: 'pointer'
           }}>
             📄 Improve Resume
           </button>
           <button onClick={() => setStep('session-report')} style={{
-            flex: 1, padding: '0.85rem', background: '#6366f1',
-            color: 'white', border: 'none', borderRadius: '8px',
-            fontSize: '15px', cursor: 'pointer', fontWeight: 'bold'
+            background: '#185FA5', color: '#fff', border: 'none',
+            padding: '12px', borderRadius: '8px',
+            fontSize: '13px', fontWeight: '500', cursor: 'pointer'
           }}>
             📊 Download Report
           </button>
           <button onClick={() => {
             setStep('upload'); setQuestions([]); setEvaluations([]);
             setCurrentQ(0); setAnswer(''); setTranscript('');
+            setFillerStats([]); setFaceStats({ eyeContact: 100, posture: 100 });
           }} style={{
-            flex: 1, padding: '0.85rem', background: '#1f2937',
-            color: 'white', border: 'none', borderRadius: '8px',
-            fontSize: '15px', cursor: 'pointer', fontWeight: 'bold'
+            background: '#1e293b', color: '#fff', border: 'none',
+            padding: '12px', borderRadius: '8px',
+            fontSize: '13px', fontWeight: '500', cursor: 'pointer'
           }}>
             🔄 New Interview
           </button>
         </div>
+
       </main>
     );
   }
