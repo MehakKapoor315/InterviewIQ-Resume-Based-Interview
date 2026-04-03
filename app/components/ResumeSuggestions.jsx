@@ -28,82 +28,134 @@ export default function ResumeSuggestions({ resumeText, onBack }) {
   }, []);
 
   if (loading) return (
-    <main style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto', fontFamily: 'sans-serif', textAlign: 'center' }}>
-      <h2>📄 Analyzing Your Resume...</h2>
-      <p style={{ color: '#666', marginTop: '1rem' }}>AI is reviewing and improving your resume</p>
-      <div style={{ marginTop: '2rem', fontSize: '48px' }}>⏳</div>
+    <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
+      <nav style={{ background: '#185FA5', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
+        <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>AI Powered</span>
+      </nav>
+      <div style={{ textAlign: 'center', padding: '80px 32px' }}>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+        <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#042C53', marginBottom: '8px' }}>Analyzing Your Resume...</h2>
+        <p style={{ fontSize: '14px', color: '#185FA5' }}>AI is reviewing and improving your resume</p>
+      </div>
     </main>
   );
 
   if (error) return (
-    <main style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <p style={{ color: 'red' }}>❌ {error}</p>
-      <button onClick={onBack} style={{ marginTop: '1rem', padding: '0.75rem 2rem', background: '#6366f1', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-        ← Go Back
-      </button>
+    <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
+      <nav style={{ background: '#185FA5', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
+        <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>AI Powered</span>
+      </nav>
+      <div style={{ textAlign: 'center', padding: '80px 32px' }}>
+        <p style={{ color: '#dc2626', marginBottom: '16px' }}>❌ {error}</p>
+        <button onClick={onBack} style={{ background: '#185FA5', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}>
+          ← Go Back
+        </button>
+      </div>
     </main>
   );
 
   return (
-    <main style={{ padding: '2rem', maxWidth: '700px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <button onClick={onBack} style={{ marginBottom: '1.5rem', padding: '0.5rem 1rem', background: '#f3f4f6', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
-        ← Back to Results
-      </button>
+    <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
 
-      <h2 style={{ marginBottom: '0.5rem' }}>📄 Resume Analysis</h2>
+      {/* Navbar */}
+      <nav style={{ background: '#185FA5', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
+        <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>AI Powered</span>
+      </nav>
 
-      {/* Overall rating */}
-      <div style={{
-        padding: '1.5rem', borderRadius: '12px', textAlign: 'center', marginBottom: '2rem',
-        background: '#f0f4ff', border: '1px solid #c7d2fe'
-      }}>
-        <p style={{ fontSize: '48px', fontWeight: 'bold', margin: 0, color: '#6366f1' }}>
-          {data.overallRating}/10
-        </p>
-        <p style={{ color: '#666', marginTop: '0.5rem' }}>Resume Rating</p>
-        <p style={{ color: '#374151', marginTop: '0.5rem', fontSize: '14px' }}>{data.summary}</p>
+      {/* Header */}
+      <div style={{ background: '#E6F1FB', padding: '28px 32px', borderBottom: '1px solid #B5D4F4', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#042C53', marginBottom: '4px' }}>Resume Analysis</h2>
+          <p style={{ fontSize: '14px', color: '#185FA5' }}>AI has reviewed your resume and found improvements</p>
+        </div>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '16px 24px', textAlign: 'center', border: '1px solid #B5D4F4' }}>
+          <div style={{ fontSize: '32px', fontWeight: '700', color: '#185FA5' }}>{data.overallRating}/10</div>
+          <div style={{ fontSize: '12px', color: '#64748b' }}>Resume Rating</div>
+        </div>
       </div>
 
-      {/* Suggestions */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>💡 Improvement Suggestions</h3>
+      {/* Body */}
+      <div style={{ padding: '24px 32px', maxWidth: '900px', margin: '0 auto' }}>
+
+        {/* Summary */}
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '18px 20px', marginBottom: '16px', border: '1px solid #e2e8f0' }}>
+          <p style={{ fontSize: '13px', fontWeight: '600', color: '#042C53', marginBottom: '8px' }}>Summary</p>
+          <p style={{ fontSize: '13px', color: '#475569', lineHeight: '1.6', margin: 0 }}>{data.summary}</p>
+        </div>
+
+        {/* Suggestions */}
+        <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#042C53', marginBottom: '12px' }}>
+          Improvement Suggestions
+        </h3>
         {data.suggestions.map((s, i) => (
           <div key={i} style={{
-            padding: '1rem', marginBottom: '0.75rem',
-            background: '#fffbeb', borderRadius: '8px',
-            border: '1px solid #fcd34d',
-            display: 'flex', gap: '0.75rem', alignItems: 'flex-start'
+            background: '#fff', borderRadius: '10px',
+            padding: '14px 16px', marginBottom: '10px',
+            border: '1px solid #e2e8f0',
+            display: 'flex', gap: '12px', alignItems: 'flex-start'
           }}>
-            <span style={{ fontSize: '18px' }}>💡</span>
-            <p style={{ margin: 0, fontSize: '14px', color: '#374151' }}>{s}</p>
+            <div style={{
+              width: '28px', height: '28px', background: '#E6F1FB',
+              borderRadius: '8px', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', fontSize: '13px', fontWeight: '600',
+              color: '#185FA5', flexShrink: 0
+            }}>
+              {i + 1}
+            </div>
+            <p style={{ fontSize: '13px', color: '#374151', lineHeight: '1.6', margin: 0 }}>{s}</p>
           </div>
         ))}
-      </div>
 
-      {/* Improved resume toggle */}
-      <button onClick={() => setShowImproved(!showImproved)} style={{
-        width: '100%', padding: '0.85rem', background: '#10b981',
-        color: 'white', border: 'none', borderRadius: '8px',
-        fontSize: '16px', cursor: 'pointer', fontWeight: 'bold',
-        marginBottom: '1rem'
-      }}>
-        {showImproved ? '🔼 Hide Improved Resume' : '✨ Show AI Improved Resume'}
-      </button>
+        {/* Show improved resume button */}
+        <button
+          onClick={() => setShowImproved(!showImproved)}
+          style={{
+            width: '100%', background: '#185FA5', color: '#fff',
+            border: 'none', padding: '14px', borderRadius: '10px',
+            fontSize: '14px', fontWeight: '500', cursor: 'pointer',
+            marginTop: '4px', marginBottom: '16px'
+          }}
+        >
+          {showImproved ? '🔼 Hide Improved Resume' : '✨ Show AI Improved Resume'}
+        </button>
 
-      {showImproved && (
-        <div style={{
-          padding: '1.5rem', background: '#f0fff4',
-          borderRadius: '12px', border: '1px solid #86efac'
-        }}>
-          <h3 style={{ marginBottom: '1rem', color: '#16a34a' }}>✅ Improved Resume</h3>
-          <pre style={{
-            whiteSpace: 'pre-wrap', fontSize: '13px',
-            color: '#1f2937', lineHeight: '1.6', fontFamily: 'sans-serif'
+        {/* Improved resume */}
+        {showImproved && (
+          <div style={{
+            background: '#fff', borderRadius: '12px',
+            padding: '20px', border: '1px solid #86efac',
+            marginBottom: '16px'
           }}>
-            {data.improvedResume}
-          </pre>
-        </div>
-      )}
+            <p style={{ fontSize: '14px', fontWeight: '600', color: '#16a34a', marginBottom: '12px' }}>
+              ✅ AI Improved Resume
+            </p>
+            <pre style={{
+              whiteSpace: 'pre-wrap', fontSize: '13px',
+              color: '#1e293b', lineHeight: '1.8',
+              fontFamily: 'sans-serif', margin: 0
+            }}>
+              {data.improvedResume}
+            </pre>
+          </div>
+        )}
+
+        {/* Back button */}
+        <button
+          onClick={onBack}
+          style={{
+            background: 'transparent', color: '#185FA5',
+            border: '1px solid #185FA5', padding: '10px 20px',
+            borderRadius: '8px', fontSize: '13px',
+            fontWeight: '500', cursor: 'pointer'
+          }}
+        >
+          ← Back to Results
+        </button>
+
+      </div>
     </main>
   );
 }

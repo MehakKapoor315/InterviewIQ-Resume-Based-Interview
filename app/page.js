@@ -61,15 +61,28 @@ export default function Home() {
 
   const speakQuestion = (text) => {
     window.speechSynthesis.cancel();
+    setIsSpeaking(true);
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.9;
     utterance.pitch = 1;
+
     utterance.onstart = () => setIsSpeaking(true);
+
     utterance.onend = () => {
       setIsSpeaking(false);
-      // Auto start listening after AI finishes speaking
       startListening();
     };
+
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+    };
+
+    // Safety timeout — force reset after 30 seconds
+    setTimeout(() => {
+      setIsSpeaking(false);
+    }, 30000);
+
     window.speechSynthesis.speak(utterance);
   };
 
@@ -95,9 +108,10 @@ export default function Home() {
       recognition.maxAlternatives = 3;
 
       recognition.onresult = (e) => {
-        let final = '';
-        let interim = '';
-        for (let i = 0; i < e.results.length; i++) {
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = e.resultIndex; i < e.results.length; i++) {
           if (e.results[i].isFinal) {
             let bestTranscript = '';
             let bestConfidence = 0;
@@ -107,19 +121,19 @@ export default function Home() {
                 bestTranscript = e.results[i][j].transcript;
               }
             }
-            final += bestTranscript + ' ';
+            finalTranscript += bestTranscript + ' ';
           } else {
-            interim += e.results[i][0].transcript;
+            interimTranscript += e.results[i][0].transcript;
           }
         }
-        if (final.trim()) {
-          setTranscript(prev => prev + final);
-          setAnswer(prev => prev + final);
-        } else if (interim) {
-          setTranscript(interim);
+
+        if (finalTranscript.trim()) {
+          setAnswer(prev => prev + finalTranscript);
+          setTranscript(''); // clear interim when final comes
+        } else if (interimTranscript) {
+          setTranscript(interimTranscript); // only show current interim
         }
       };
-
       recognition.onerror = (e) => {
         if (e.error === 'aborted') {
           setTimeout(() => {
@@ -142,9 +156,15 @@ export default function Home() {
       };
 
       recognition.onend = () => {
-        // Auto restart only if still listening
         if (isListeningRef.current) {
-          try { recognition.start(); } catch (e) { }
+          try {
+            // Small delay before restart to avoid duplicate capture
+            setTimeout(() => {
+              if (isListeningRef.current) {
+                recognition.start();
+              }
+            }, 500);
+          } catch (e) { }
         } else {
           setIsListening(false);
         }
@@ -612,14 +632,14 @@ export default function Home() {
         </span>
       </div>
 
-      {/* Main content */}
+      {/* Main content grid */}
       <div style={{
         display: 'grid', gridTemplateColumns: '1fr 1fr',
         gap: '20px', padding: '24px 32px',
         maxWidth: '1000px', margin: '0 auto'
       }}>
 
-        {/* Left — Camera + Analysis */}
+        {/* LEFT — Camera + Analysis */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
           {/* Camera */}
@@ -672,7 +692,7 @@ export default function Home() {
           </div>
 
           {/* Transcript */}
-          {(transcript || answer) && (
+          {(answer || transcript) && (
             <div style={{
               padding: '14px 16px', background: '#f8fafc',
               borderRadius: '10px', border: '1px solid #e2e8f0'
@@ -681,14 +701,17 @@ export default function Home() {
                 YOUR ANSWER
               </p>
               <p style={{ fontSize: '13px', color: '#334155', lineHeight: '1.6', margin: 0 }}>
-                {transcript || answer}
+                {answer}
+                <span style={{ color: '#94a3b8' }}>{transcript}</span>
                 {isListening && <span style={{ color: '#185FA5', marginLeft: '4px' }}>●</span>}
               </p>
             </div>
           )}
-        </div>
 
-        {/* Right — Question + Controls */}
+        </div>
+        {/* ← LEFT div closes here */}
+
+        {/* RIGHT — Question + Controls */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
           {/* Question card */}
@@ -732,10 +755,10 @@ export default function Home() {
           {/* Mic button */}
           <button
             onClick={isListening ? stopListening : startListening}
-            disabled={isSpeaking}
+            disabled={false}
             style={{
               padding: '14px', borderRadius: '10px', border: 'none',
-              cursor: isSpeaking ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               background: isListening ? '#dc2626' : '#16a34a',
               color: '#fff', fontWeight: '600', fontSize: '15px'
             }}
@@ -772,7 +795,11 @@ export default function Home() {
           </div>
 
         </div>
+        {/* ← RIGHT div closes here */}
+
       </div>
+      {/* ← Main grid closes here */}
+
     </main>
   );
 
