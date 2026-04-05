@@ -71,7 +71,11 @@ export default function Home() {
 
     utterance.onend = () => {
       setIsSpeaking(false);
-      startListening();
+      // Wait 1 second after AI stops speaking before listening
+      // This prevents AI voice from being recorded
+      setTimeout(() => {
+        startListening();
+      }, 1000);
     };
 
     utterance.onerror = () => {
@@ -87,6 +91,7 @@ export default function Home() {
   };
 
   const startListening = async () => {
+    if (isSpeaking) return;
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (err) {
@@ -732,7 +737,7 @@ export default function Home() {
       }}>
 
         {/* LEFT — Camera + Analysis */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'sticky', top: '0' }}>
 
           {/* Camera */}
           <div style={{ background: '#1e293b', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
@@ -787,15 +792,24 @@ export default function Home() {
           {(answer || transcript) && (
             <div style={{
               padding: '14px 16px', background: '#f8fafc',
-              borderRadius: '10px', border: '1px solid #e2e8f0'
+              borderRadius: '10px', border: '1px solid #e2e8f0',
+              minHeight: '80px'
             }}>
               <p style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '6px', fontWeight: '500' }}>
                 YOUR ANSWER
               </p>
               <p style={{ fontSize: '13px', color: '#334155', lineHeight: '1.6', margin: 0 }}>
-                {answer}
-                <span style={{ color: '#94a3b8' }}>{transcript}</span>
-                {isListening && <span style={{ color: '#185FA5', marginLeft: '4px' }}>●</span>}
+                {answer || transcript ? (
+                  <>
+                    {answer}
+                    <span style={{ color: '#94a3b8' }}>{transcript}</span>
+                    {isListening && <span style={{ color: '#185FA5', marginLeft: '4px' }}>●</span>}
+                  </>
+                ) : (
+                  <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>
+                    Your answer will appear here as you speak...
+                  </span>
+                )}
               </p>
             </div>
           )}
@@ -804,7 +818,7 @@ export default function Home() {
         {/* ← LEFT div closes here */}
 
         {/* RIGHT — Question + Controls */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: 'fit-content', position: 'sticky', top: '24px' }}>
 
           {/* Question card */}
           <div style={{
