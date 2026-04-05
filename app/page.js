@@ -143,9 +143,13 @@ export default function Home() {
         if (e.error === 'aborted') {
           setTimeout(() => {
             if (isListeningRef.current) {
-              try { recognition.start(); } catch (err) { }
+              try {
+                recognition.start();
+              } catch (err) {
+                if (err.name === 'InvalidStateError') return;
+              }
             }
-          }, 300);
+          }, 500);
           return;
         } else if (e.error === 'network') {
           alert('Speech recognition needs internet connection.');
@@ -162,14 +166,18 @@ export default function Home() {
 
       recognition.onend = () => {
         if (isListeningRef.current) {
-          try {
-            // Small delay before restart to avoid duplicate capture
-            setTimeout(() => {
-              if (isListeningRef.current) {
+          setTimeout(() => {
+            if (isListeningRef.current) {
+              try {
                 recognition.start();
+              } catch (e) {
+                if (e.name === 'InvalidStateError') {
+                  // Already started — ignore
+                  return;
+                }
               }
-            }, 500);
-          } catch (e) { }
+            }
+          }, 500);
         } else {
           setIsListening(false);
         }
