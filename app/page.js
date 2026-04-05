@@ -286,28 +286,89 @@ export default function Home() {
 
       {/* Hero */}
       <div style={{
-        background: '#E6F1FB', padding: '52px 32px 44px',
-        textAlign: 'center', borderBottom: '1px solid #B5D4F4'
+        background: 'linear-gradient(135deg, #E6F1FB 0%, #dbeafe 100%)',
+        padding: '60px 32px 52px',
+        textAlign: 'center', borderBottom: '1px solid #B5D4F4',
+        position: 'relative'
       }}>
+        <div style={{
+          display: 'inline-block', background: '#185FA5',
+          color: '#fff', fontSize: '11px', fontWeight: '600',
+          padding: '6px 16px', borderRadius: '999px',
+          marginBottom: '20px', letterSpacing: '0.5px'
+        }}>
+          AI POWERED INTERVIEW PREPARATION
+        </div>
         <h1 style={{
-          fontSize: '32px', fontWeight: '700',
-          color: '#042C53', marginBottom: '12px', lineHeight: '1.2'
+          fontSize: '36px', fontWeight: '700',
+          color: '#042C53', marginBottom: '16px', lineHeight: '1.2'
         }}>
           Prepare smarter.<br />Interview with confidence.
         </h1>
         <p style={{
           fontSize: '16px', color: '#185FA5',
-          maxWidth: '500px', margin: '0 auto', lineHeight: '1.7'
+          maxWidth: '520px', margin: '0 auto', lineHeight: '1.8'
         }}>
           Upload your resume and let AI generate personalized interview questions,
           analyze your responses, and help you land your dream job.
         </p>
+        <div style={{
+          display: 'flex', justifyContent: 'center',
+          gap: '24px', marginTop: '24px'
+        }}>
+          {['Resume Parsing', 'Voice Recognition', 'Video Analysis', 'PDF Report'].map((tag, i) => (
+            <span key={i} style={{
+              fontSize: '12px', color: '#185FA5',
+              background: '#fff', padding: '4px 12px',
+              borderRadius: '999px', border: '1px solid #B5D4F4',
+              fontWeight: '500'
+            }}>
+              {tag}
+            </span>
+          ))}
+        </div>
       </div>
 
+
       {/* Feature cards */}
+      <style>{`
+  .feat-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    cursor: default;
+  }
+  .feat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(24,95,165,0.15);
+    border-color: #185FA5;
+  }
+  .upload-btn {
+    display: inline-block;
+    background: #185FA5;
+    color: #fff;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+  .upload-btn:hover {
+    background: #0C447C;
+    transform: scale(1.02);
+  }
+  .upload-btn:active {
+    background: #042C53;
+    transform: scale(0.98);
+  }
+`}</style>
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '16px', padding: '32px', background: '#fff',
+        gap: '20px', padding: '32px', background: '#f0f4f8',
         maxWidth: '900px', margin: '0 auto'
       }}>
         {[
@@ -315,21 +376,19 @@ export default function Home() {
           { icon: '🎥', title: 'Live video interview', desc: 'Real-time camera interview with eye contact tracking, posture analysis and voice recognition' },
           { icon: '📊', title: 'Detailed PDF report', desc: 'Download complete performance report with scores, feedback and resume improvement suggestions' },
         ].map((f, i) => (
-          <div key={i} style={{
-            background: '#f8fafc', borderRadius: '12px',
-            padding: '20px', border: '1px solid #e2e8f0'
-          }}>
+          <div key={i} className="feat-card">
             <div style={{
-              width: '40px', height: '40px', background: '#E6F1FB',
-              borderRadius: '10px', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '18px', marginBottom: '12px'
+              width: '48px', height: '48px', background: '#E6F1FB',
+              borderRadius: '12px', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', fontSize: '22px', marginBottom: '16px',
+              border: '1px solid #B5D4F4'
             }}>
               {f.icon}
             </div>
-            <p style={{ fontSize: '14px', fontWeight: '600', color: '#042C53', marginBottom: '6px' }}>
+            <p style={{ fontSize: '15px', fontWeight: '600', color: '#042C53', marginBottom: '8px' }}>
               {f.title}
             </p>
-            <p style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.6' }}>
+            <p style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.7', margin: 0 }}>
               {f.desc}
             </p>
           </div>
@@ -357,11 +416,7 @@ export default function Home() {
             PDF format only — your resume will be analyzed by AI
           </p>
 
-          <label style={{
-            display: 'inline-block', background: '#185FA5', color: '#fff',
-            padding: '12px 32px', borderRadius: '8px', fontSize: '15px',
-            fontWeight: '500', cursor: 'pointer'
-          }}>
+          <label className="upload-btn">
             Choose PDF file
             <input
               type="file"
@@ -370,7 +425,6 @@ export default function Home() {
               style={{ display: 'none' }}
             />
           </label>
-
           {loading && (
             <p style={{ marginTop: '16px', color: '#185FA5', fontSize: '14px' }}>
               ⏳ Parsing your resume...
@@ -411,12 +465,13 @@ export default function Home() {
             <button
               onClick={generateQuestions}
               disabled={loading}
+              className={loading ? '' : 'upload-btn'}
               style={{
-                background: loading ? '#ccc' : '#185FA5',
                 color: '#fff', border: 'none',
                 padding: '12px 28px', borderRadius: '8px',
                 fontSize: '15px', fontWeight: '500',
-                cursor: loading ? 'not-allowed' : 'pointer'
+                cursor: loading ? 'not-allowed' : 'pointer',
+                background: loading ? '#cbd5e1' : undefined
               }}
             >
               {loading ? 'Generating...' : 'Generate Questions →'}
@@ -462,6 +517,45 @@ export default function Home() {
 
     return (
       <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
+        <style>{`
+        .upload-btn {
+    display: inline-block;
+    background: #185FA5;
+    color: #fff;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+  .upload-btn:hover {
+    background: #0C447C;
+    transform: scale(1.02);
+  }
+  .upload-btn:active {
+    background: #042C53;
+    transform: scale(0.98);
+  }
+    .q-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      cursor: default;
+    }
+    .q-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(24,95,165,0.12);
+      border-color: #185FA5;
+      background: #fff;
+    }
+  `}</style>
 
         {/* Navbar */}
         <nav style={{
@@ -522,12 +616,7 @@ export default function Home() {
             }[q.type] || { background: '#f1f5f9', color: '#475569' };
 
             return (
-              <div key={q.id} style={{
-                background: '#f8fafc', borderRadius: '12px',
-                padding: '18px 20px', marginBottom: '12px',
-                border: '1px solid #e2e8f0',
-                display: 'flex', gap: '16px', alignItems: 'flex-start'
-              }}>
+              <div key={q.id} className="q-card">
                 <div style={{
                   width: '32px', height: '32px', background: '#185FA5',
                   color: '#fff', borderRadius: '8px', fontSize: '13px',
@@ -573,11 +662,14 @@ export default function Home() {
           </button>
           <button
             onClick={() => setStep('interview')}
+            className="upload-btn"
             style={{
-              background: '#185FA5', color: '#fff',
-              border: 'none', padding: '12px 32px',
-              borderRadius: '8px', fontSize: '15px',
-              fontWeight: '500', cursor: 'pointer'
+              border: 'none',
+              padding: '12px 32px',
+              borderRadius: '8px',
+              fontSize: '15px',
+              fontWeight: '500',
+              cursor: 'pointer'
             }}
           >
             Start Video Interview →
@@ -829,6 +921,39 @@ export default function Home() {
     return (
       <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
 
+        <style>{`
+    .metric-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      cursor: default;
+    }
+    .metric-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(24,95,165,0.12);
+      border-color: #185FA5;
+      background: #fff;
+    }
+    .q-result-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      border: 1px solid #e2e8f0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      cursor: default;
+    }
+    .q-result-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(24,95,165,0.12);
+      border-color: #185FA5;
+      background: #fff;
+    }
+  `}</style>
+
         {/* Navbar */}
         <nav style={{
           background: '#185FA5', padding: '14px 32px',
@@ -877,10 +1002,7 @@ export default function Home() {
             { icon: '🧍', val: `${faceStats.posture}%`, label: 'Posture', color: faceStats.posture >= 70 ? '#16a34a' : faceStats.posture >= 50 ? '#d97706' : '#dc2626' },
             { icon: '🗣️', val: totalFillers, label: 'Filler Words', color: totalFillers <= 5 ? '#16a34a' : totalFillers <= 15 ? '#d97706' : '#dc2626' },
           ].map((m, i) => (
-            <div key={i} style={{
-              background: '#f8fafc', borderRadius: '12px',
-              padding: '16px', border: '1px solid #e2e8f0', textAlign: 'center'
-            }}>
+            <div key={i} className="metric-card">
               <div style={{ fontSize: '20px', marginBottom: '6px' }}>{m.icon}</div>
               <div style={{ fontSize: '22px', fontWeight: '700', color: m.color, marginBottom: '2px' }}>{m.val}</div>
               <div style={{ fontSize: '12px', color: '#64748b' }}>{m.label}</div>
@@ -921,11 +1043,7 @@ export default function Home() {
             Question by Question Breakdown
           </h3>
           {evaluations.map((e, i) => (
-            <div key={i} style={{
-              background: '#f8fafc', borderRadius: '12px',
-              padding: '16px 18px', marginBottom: '10px',
-              border: '1px solid #e2e8f0'
-            }}>
+            <div key={i} className="q-result-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                 <strong style={{ fontSize: '13px', color: '#1e293b', flex: 1, marginRight: '12px' }}>
                   Q{i + 1}. {e.question}
