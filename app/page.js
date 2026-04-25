@@ -2,8 +2,9 @@
 import FaceAnalyzer from './components/FaceAnalyzer';
 import ResumeSuggestions from './components/ResumeSuggestions';
 import SessionReport from './components/SessionReport';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [faceStats, setFaceStats] = useState({ eyeContact: 100, posture: 100 });
@@ -24,6 +25,54 @@ export default function Home() {
   const webcamRef = useRef(null);
   const recognitionRef = useRef(null);
   const isListeningRef = useRef(false);
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) setUser(data.user);
+        else router.push('/login');
+      })
+      .catch(() => router.push('/login'));
+  }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      if (res.ok) router.push('/login');
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
+  };
+
+  const handleSetPassword = async () => {
+    const password = prompt('Enter a new password for your account (min 6 characters):');
+    if (!password) return;
+    if (password.length < 6) {
+      alert('Password too short!');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth/set-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        // Update user state to reflect new authMethod
+        setUser({ ...user, authMethod: 'both' });
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert('Failed to set password');
+    }
+  };
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
@@ -285,16 +334,60 @@ export default function Home() {
         background: '#185FA5', padding: '14px 32px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between'
       }}>
-        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600', letterSpacing: '-0.3px' }}>
-          InterviewIQ
-        </span>
-        <span style={{
-          background: '#B5D4F4', color: '#0C447C',
-          fontSize: '11px', padding: '4px 12px',
-          borderRadius: '999px', fontWeight: '500'
-        }}>
-          AI Powered
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600', letterSpacing: '-0.3px' }}>
+            InterviewIQ
+          </span>
+          <span style={{
+            background: '#B5D4F4', color: '#0C447C',
+            fontSize: '11px', padding: '4px 12px',
+            borderRadius: '999px', fontWeight: '500'
+          }}>
+            AI Powered
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {user && (
+            <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>
+              Hi, {user.name}
+            </span>
+          )}
+          {user && user.authMethod === 'google' && (
+            <button
+              onClick={handleSetPassword}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                color: '#fff',
+                border: '1px solid #B5D4F4',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+            >
+              Set Password
+            </button>
+          )}
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'transparent',
+              color: '#fff',
+              border: '1px solid #B5D4F4',
+              padding: '6px 16px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+            onMouseOut={(e) => e.target.style.background = 'transparent'}
+          >
+            Logout
+          </button>
+        </div>
       </nav>
 
       {/* Hero */}
@@ -575,16 +668,40 @@ export default function Home() {
           background: '#185FA5', padding: '14px 32px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between'
         }}>
-          <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>
-            InterviewIQ
-          </span>
-          <span style={{
-            background: '#B5D4F4', color: '#0C447C',
-            fontSize: '11px', padding: '4px 12px',
-            borderRadius: '999px', fontWeight: '500'
-          }}>
-            AI Powered
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>
+              InterviewIQ
+            </span>
+            <span style={{
+              background: '#B5D4F4', color: '#0C447C',
+              fontSize: '11px', padding: '4px 12px',
+              borderRadius: '999px', fontWeight: '500'
+            }}>
+              AI Powered
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {user && (
+              <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>
+                Hi, {user.name}
+              </span>
+            )}
+            <button
+              onClick={handleLogout}
+              style={{
+                background: 'transparent',
+                color: '#fff',
+                border: '1px solid #B5D4F4',
+                padding: '6px 16px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </nav>
 
         {/* Header */}
@@ -702,16 +819,57 @@ export default function Home() {
         background: '#185FA5', padding: '14px 32px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between'
       }}>
-        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>
-          InterviewIQ
-        </span>
-        <span style={{
-          background: '#B5D4F4', color: '#0C447C',
-          fontSize: '11px', padding: '4px 12px',
-          borderRadius: '999px', fontWeight: '500'
-        }}>
-          AI Powered
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>
+            InterviewIQ
+          </span>
+          <span style={{
+            background: '#B5D4F4', color: '#0C447C',
+            fontSize: '11px', padding: '4px 12px',
+            borderRadius: '999px', fontWeight: '500'
+          }}>
+            AI Powered
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {user && (
+            <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>
+              Hi, {user.name}
+            </span>
+          )}
+          {user && user.authMethod === 'google' && (
+            <button
+              onClick={handleSetPassword}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                color: '#fff',
+                border: '1px solid #B5D4F4',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+            >
+              Set Password
+            </button>
+          )}
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'transparent',
+              color: '#fff',
+              border: '1px solid #B5D4F4',
+              padding: '6px 16px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            Logout
+          </button>
+        </div>
       </nav>
 
       {/* Progress bar */}
@@ -981,10 +1139,34 @@ export default function Home() {
           background: '#185FA5', padding: '14px 32px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between'
         }}>
-          <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
-          <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>
-            AI Powered
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
+            <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>
+              AI Powered
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {user && (
+              <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>
+                Hi, {user.name}
+              </span>
+            )}
+            <button
+              onClick={handleLogout}
+              style={{
+                background: 'transparent',
+                color: '#fff',
+                border: '1px solid #B5D4F4',
+                padding: '6px 16px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </nav>
 
         {/* Hero - Overall Score */}
@@ -1127,6 +1309,9 @@ export default function Home() {
     return (
       <ResumeSuggestions
         resumeText={resumeText}
+        user={user}
+        onLogout={handleLogout}
+        onSetPassword={handleSetPassword}
         onBack={() => setStep('done')}
       />
     );
@@ -1138,6 +1323,9 @@ export default function Home() {
         resumeText={resumeText}
         faceStats={faceStats}
         fillerStats={fillerStats}
+        user={user}
+        onLogout={handleLogout}
+        onSetPassword={handleSetPassword}
         onBack={() => setStep('done')}
       />
     );

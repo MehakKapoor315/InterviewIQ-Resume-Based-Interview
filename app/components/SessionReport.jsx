@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-export default function SessionReport({ evaluations, resumeText, onBack, faceStats, fillerStats }) {
+export default function SessionReport({ evaluations, resumeText, onBack, faceStats, fillerStats, user, onLogout, onSetPassword }) {
   const [generating, setGenerating] = useState(false);
 
   const avgScore = Math.round(
@@ -184,8 +184,31 @@ export default function SessionReport({ evaluations, resumeText, onBack, faceSta
 
       {/* Navbar */}
       <nav style={{ background: '#185FA5', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
-        <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>AI Powered</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
+          <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>AI Powered</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {user && <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>Hi, {user.name}</span>}
+          {user && user.authMethod === 'google' && (
+            <button
+              onClick={onSetPassword}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                color: '#fff',
+                border: '1px solid #B5D4F4',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+            >
+              Set Password
+            </button>
+          )}
+          <button onClick={onLogout} style={{ background: 'transparent', color: '#fff', border: '1px solid #B5D4F4', padding: '6px 16px', borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>Logout</button>
+        </div>
       </nav>
 
       {/* Header */}

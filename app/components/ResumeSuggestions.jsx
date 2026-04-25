@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-export default function ResumeSuggestions({ resumeText, onBack }) {
+export default function ResumeSuggestions({ resumeText, onBack, user, onLogout, onSetPassword }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -30,8 +30,31 @@ export default function ResumeSuggestions({ resumeText, onBack }) {
   if (loading) return (
     <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
       <nav style={{ background: '#185FA5', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
-        <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>AI Powered</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
+          <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>AI Powered</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {user && <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>Hi, {user.name}</span>}
+          {user && user.authMethod === 'google' && (
+            <button
+              onClick={onSetPassword}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                color: '#fff',
+                border: '1px solid #B5D4F4',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+            >
+              Set Password
+            </button>
+          )}
+          <button onClick={onLogout} style={{ background: 'transparent', color: '#fff', border: '1px solid #B5D4F4', padding: '6px 16px', borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>Logout</button>
+        </div>
       </nav>
       <div style={{ textAlign: 'center', padding: '80px 32px' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
@@ -44,8 +67,31 @@ export default function ResumeSuggestions({ resumeText, onBack }) {
   if (error) return (
     <main style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'sans-serif' }}>
       <nav style={{ background: '#185FA5', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
-        <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>AI Powered</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <span style={{ color: '#fff', fontSize: '22px', fontWeight: '600' }}>InterviewIQ</span>
+          <span style={{ background: '#B5D4F4', color: '#0C447C', fontSize: '11px', padding: '4px 12px', borderRadius: '999px', fontWeight: '500' }}>AI Powered</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {user && <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>Hi, {user.name}</span>}
+          {user && user.authMethod === 'google' && (
+            <button
+              onClick={onSetPassword}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                color: '#fff',
+                border: '1px solid #B5D4F4',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+            >
+              Set Password
+            </button>
+          )}
+          <button onClick={onLogout} style={{ background: 'transparent', color: '#fff', border: '1px solid #B5D4F4', padding: '6px 16px', borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>Logout</button>
+        </div>
       </nav>
       <div style={{ textAlign: 'center', padding: '80px 32px' }}>
         <p style={{ color: '#dc2626', marginBottom: '16px' }}>❌ {error}</p>
