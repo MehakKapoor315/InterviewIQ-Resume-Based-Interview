@@ -7,11 +7,14 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_SERVER_HOST,
   port: parseInt(process.env.EMAIL_SERVER_PORT),
-  secure: true,
+  secure: process.env.EMAIL_SERVER_PORT === '465', // true for 465, false for others
   auth: {
     user: process.env.EMAIL_SERVER_USER,
     pass: process.env.EMAIL_SERVER_PASSWORD,
   },
+  // Add a timeout to prevent 502 Bad Gateway if SMTP is slow
+  connectionTimeout: 5000, 
+  greetingTimeout: 5000,
 });
 
 export async function POST(request) {
