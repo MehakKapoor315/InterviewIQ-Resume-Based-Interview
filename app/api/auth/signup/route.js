@@ -8,13 +8,12 @@ const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_SERVER_HOST,
   port: parseInt(process.env.EMAIL_SERVER_PORT),
   secure: process.env.EMAIL_SERVER_PORT === '465',
-  pool: true, // Use pooling for faster connections
+  pool: true,
   auth: {
     user: process.env.EMAIL_SERVER_USER,
     pass: process.env.EMAIL_SERVER_PASSWORD,
   },
-  connectionTimeout: 5000, 
-  greetingTimeout: 5000,
+  timeout: 5000, // General timeout
 });
 
 export async function POST(request) {
@@ -25,7 +24,12 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
-    const client = await clientPromise;
+    // Parallelize heavy tasks: Connect to DB and Hash Password at the same time
+    const [client, hashedPassword] = await Promise.all([
+      clientPromise,
+      bcrypt.hash(password, 6) // Reduced rounds for maximum speed on Netlify
+    ]);
+
     const db = client.db();
     const users = db.collection('users');
 
@@ -34,7 +38,6 @@ export async function POST(request) {
       return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 8); // Reduced rounds for speed on serverless
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     const userData = {
