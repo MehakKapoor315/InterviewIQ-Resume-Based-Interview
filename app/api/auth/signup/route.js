@@ -7,12 +7,12 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_SERVER_HOST,
   port: parseInt(process.env.EMAIL_SERVER_PORT),
-  secure: process.env.EMAIL_SERVER_PORT === '465', // true for 465, false for others
+  secure: process.env.EMAIL_SERVER_PORT === '465',
+  pool: true, // Use pooling for faster connections
   auth: {
     user: process.env.EMAIL_SERVER_USER,
     pass: process.env.EMAIL_SERVER_PASSWORD,
   },
-  // Add a timeout to prevent 502 Bad Gateway if SMTP is slow
   connectionTimeout: 5000, 
   greetingTimeout: 5000,
 });
@@ -34,7 +34,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 8); // Reduced rounds for speed on serverless
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     const userData = {
